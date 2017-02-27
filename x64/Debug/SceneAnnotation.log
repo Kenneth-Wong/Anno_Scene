@@ -1,0 +1,48 @@
+﻿生成启动时间为 2017/2/23 15:07:05。
+     1>项目“E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\SceneAnnotation\SceneAnnotation.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         D:\Program Files\vs2013\VC\bin\x86_amd64\CL.exe /c /I"D:\Program Files\opencv\build\include" /I"D:\Program Files\opencv\build\include\opencv" /I"D:\Program Files\opencv\build\include\opencv2" /I"D:\Program Files\boost_1_59_0" /IE:\WenbinWang\Method\Anno_COCO\SceneAnnotation\SceneAnnotation\json\include /Zi /nologo /W3 /WX- /sdl /Od /D WIN32 /D _WINDOWS /D _DEBUG /D _SCL_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_WARNINGS /D USE_OPENCV /D USE_LMDB /D USE_LEVELDB /D CPU_ONLY /D GLOG_NO_ABBREVIATED_SEVERITIES /D _UNICODE /D UNICODE /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"x64\Debug\SceneAnnotation.pch" /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt stdafx.cpp
+         stdafx.cpp
+         D:\Program Files\vs2013\VC\bin\x86_amd64\CL.exe /c /I"D:\Program Files\opencv\build\include" /I"D:\Program Files\opencv\build\include\opencv" /I"D:\Program Files\opencv\build\include\opencv2" /I"D:\Program Files\boost_1_59_0" /IE:\WenbinWang\Method\Anno_COCO\SceneAnnotation\SceneAnnotation\json\include /Zi /nologo /W3 /WX- /sdl /Od /D WIN32 /D _WINDOWS /D _DEBUG /D _SCL_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_WARNINGS /D USE_OPENCV /D USE_LMDB /D USE_LEVELDB /D CPU_ONLY /D GLOG_NO_ABBREVIATED_SEVERITIES /D _UNICODE /D UNICODE /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"x64\Debug\SceneAnnotation.pch" /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt CvvImage.cpp IOFile.cpp SceneAnnotation.cpp SceneAnnotationDlg.cpp
+         SceneAnnotationDlg.cpp
+     1>D:\Program Files\opencv\build\include\opencv2/core/mat.hpp(1965): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>D:\Program Files\opencv\build\include\opencv2/core/persistence.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>D:\Program Files\opencv\build\include\opencv2/core/utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>SceneAnnotationDlg.cpp(151): warning C4002: “assert”宏的实参太多
+     1>SceneAnnotationDlg.cpp(162): warning C4002: “assert”宏的实参太多
+     1>SceneAnnotationDlg.cpp(199): warning C4002: “assert”宏的实参太多
+     1>SceneAnnotationDlg.cpp(282): warning C4267: “参数”: 从“size_t”转换到“short”，可能丢失数据
+         SceneAnnotation.cpp
+     1>D:\Program Files\opencv\build\include\opencv2/core/mat.hpp(1965): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>D:\Program Files\opencv\build\include\opencv2/core/persistence.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>D:\Program Files\opencv\build\include\opencv2/core/utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+         IOFile.cpp
+         CvvImage.cpp
+     1>D:\Program Files\opencv\build\include\opencv2/core/mat.hpp(1965): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>D:\Program Files\opencv\build\include\opencv2/core/persistence.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>D:\Program Files\opencv\build\include\opencv2/core/utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+         正在生成代码...
+       Link:
+         D:\Program Files\vs2013\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\x64\Debug\SceneAnnotation.exe" /INCREMENTAL /NOLOGO /LIBPATH:"D:\Program Files\opencv\build\x64\vc12\lib" /LIBPATH:"D:\Program Files\boost_1_56_0\lib64-msvc-12.0" /LIBPATH:"D:\Program Files\boost_1_59_0\lib64-msvc-12.0" /LIBPATH:E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\SceneAnnotation\json\lib\Debug opencv_ts300d.lib opencv_world300d.lib json_vc71_libmtd.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"D:\Program Files\vs2013\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\x64\Debug\SceneAnnotation.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /ENTRY:"wWinMainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\x64\Debug\SceneAnnotation.lib" /MACHINE:X64 x64\Debug\SceneAnnotation.res
+         x64\Debug\CvvImage.obj
+         x64\Debug\IOFile.obj
+         x64\Debug\SceneAnnotation.obj
+         x64\Debug\SceneAnnotationDlg.obj
+         x64\Debug\stdafx.obj
+     1>SceneAnnotationDlg.obj : error LNK2019: 无法解析的外部符号 "public: __cdecl Json::Value::Value(enum Json::ValueType)" (??0Value@Json@@QEAA@W4ValueType@1@@Z)，该符号在函数 "public: void __cdecl CSceneAnnotationDlg::OnBnClickedEnsure(void)" (?OnBnClickedEnsure@CSceneAnnotationDlg@@QEAAXXZ) 中被引用
+     1>SceneAnnotationDlg.obj : error LNK2019: 无法解析的外部符号 "public: __cdecl Json::Value::Value(int)" (??0Value@Json@@QEAA@H@Z)，该符号在函数 "public: void __cdecl CSceneAnnotationDlg::OnBnClickedEnsure(void)" (?OnBnClickedEnsure@CSceneAnnotationDlg@@QEAAXXZ) 中被引用
+     1>SceneAnnotationDlg.obj : error LNK2019: 无法解析的外部符号 "public: __cdecl Json::Value::Value(char const *)" (??0Value@Json@@QEAA@PEBD@Z)，该符号在函数 "public: void __cdecl CSceneAnnotationDlg::OnBnClickedEnsure(void)" (?OnBnClickedEnsure@CSceneAnnotationDlg@@QEAAXXZ) 中被引用
+     1>SceneAnnotationDlg.obj : error LNK2019: 无法解析的外部符号 "public: __cdecl Json::Value::Value(class Json::Value const &)" (??0Value@Json@@QEAA@AEBV01@@Z)，该符号在函数 "public: void __cdecl CSceneAnnotationDlg::OnBnClickedEnsure(void)" (?OnBnClickedEnsure@CSceneAnnotationDlg@@QEAAXXZ) 中被引用
+     1>SceneAnnotationDlg.obj : error LNK2019: 无法解析的外部符号 "public: __cdecl Json::Value::~Value(void)" (??1Value@Json@@QEAA@XZ)，该符号在函数 "public: void __cdecl CSceneAnnotationDlg::OnBnClickedEnsure(void)" (?OnBnClickedEnsure@CSceneAnnotationDlg@@QEAAXXZ) 中被引用
+     1>SceneAnnotationDlg.obj : error LNK2019: 无法解析的外部符号 "public: class Json::Value & __cdecl Json::Value::operator=(class Json::Value)" (??4Value@Json@@QEAAAEAV01@V01@@Z)，该符号在函数 "public: void __cdecl CSceneAnnotationDlg::OnBnClickedEnsure(void)" (?OnBnClickedEnsure@CSceneAnnotationDlg@@QEAAXXZ) 中被引用
+     1>SceneAnnotationDlg.obj : error LNK2019: 无法解析的外部符号 "public: class Json::Value & __cdecl Json::Value::append(class Json::Value const &)" (?append@Value@Json@@QEAAAEAV12@AEBV12@@Z)，该符号在函数 "public: void __cdecl CSceneAnnotationDlg::OnBnClickedEnsure(void)" (?OnBnClickedEnsure@CSceneAnnotationDlg@@QEAAXXZ) 中被引用
+     1>SceneAnnotationDlg.obj : error LNK2019: 无法解析的外部符号 "public: class Json::Value & __cdecl Json::Value::operator[](char const *)" (??AValue@Json@@QEAAAEAV01@PEBD@Z)，该符号在函数 "public: void __cdecl CSceneAnnotationDlg::OnBnClickedEnsure(void)" (?OnBnClickedEnsure@CSceneAnnotationDlg@@QEAAXXZ) 中被引用
+     1>SceneAnnotationDlg.obj : error LNK2019: 无法解析的外部符号 "public: virtual __cdecl Json::Writer::~Writer(void)" (??1Writer@Json@@UEAA@XZ)，该符号在函数 "public: virtual __cdecl Json::FastWriter::~FastWriter(void)" (??1FastWriter@Json@@UEAA@XZ) 中被引用
+     1>SceneAnnotationDlg.obj : error LNK2019: 无法解析的外部符号 "public: __cdecl Json::FastWriter::FastWriter(void)" (??0FastWriter@Json@@QEAA@XZ)，该符号在函数 "public: void __cdecl CSceneAnnotationDlg::OnBnClickedEnsure(void)" (?OnBnClickedEnsure@CSceneAnnotationDlg@@QEAAXXZ) 中被引用
+     1>SceneAnnotationDlg.obj : error LNK2019: 无法解析的外部符号 "public: virtual class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > __cdecl Json::FastWriter::write(class Json::Value const &)" (?write@FastWriter@Json@@UEAA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBVValue@2@@Z)，该符号在函数 "public: void __cdecl CSceneAnnotationDlg::OnBnClickedEnsure(void)" (?OnBnClickedEnsure@CSceneAnnotationDlg@@QEAAXXZ) 中被引用
+     1>E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\x64\Debug\SceneAnnotation.exe : fatal error LNK1120: 11 个无法解析的外部命令
+     1>已完成生成项目“E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\SceneAnnotation\SceneAnnotation.vcxproj”(Build 个目标)的操作 - 失败。
+
+生成失败。
+
+已用时间 00:00:06.94

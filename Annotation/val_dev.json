@@ -1,0 +1,26 @@
+{
+   "COCO_val2014_000000000074.jpg" : {
+      "scene_attribute" : [ 48, 74, 88 ],
+      "scene_class" : 2
+   },
+   "COCO_val2014_000000000133.jpg" : {
+      "scene_attribute" : [ 56, 85, 88, 91 ],
+      "scene_class" : 66
+   },
+   "COCO_val2014_000000000136.jpg" : {
+      "scene_attribute" : [ 76, 88, 91 ],
+      "scene_class" : 126
+   },
+   "COCO_val2014_000000000139.jpg" : {
+      "scene_attribute" : [ 78, 88, 91 ],
+      "scene_class" : 112
+   },
+   "COCO_val2014_000000000143.jpg" : {
+      "scene_attribute" : [],
+      "scene_class" : -1
+   },
+   "COCO_val2014_000000000164.jpg" : {
+      "scene_attribute" : [ 76, 88, 91 ],
+      "scene_class" : 109
+   }
+}

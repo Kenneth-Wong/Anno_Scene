@@ -1,0 +1,29 @@
+﻿生成启动时间为 2017/2/27 16:39:13。
+     1>项目“E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\SceneAnnotation\SceneAnnotation.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         D:\Program Files\vs2013\VC\bin\CL.exe /c /I"D:\Program Files\opencv\build\include" /I"D:\Program Files\opencv\build\include\opencv" /I"D:\Program Files\opencv\build\include\opencv2" /IE:\WenbinWang\Method\Anno_COCO\SceneAnnotation\SceneAnnotation\json\include /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D _UNICODE /D UNICODE /D _AFXDLL /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\SceneAnnotation.pch" /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt IOFile.cpp SceneAnnotation.cpp SceneAnnotationDlg.cpp
+         IOFile.cpp
+         SceneAnnotation.cpp
+     1>D:\Program Files\opencv\build\include\opencv2/core/mat.hpp(1965): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>D:\Program Files\opencv\build\include\opencv2/core/persistence.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>D:\Program Files\opencv\build\include\opencv2/core/utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+         SceneAnnotationDlg.cpp
+     1>D:\Program Files\opencv\build\include\opencv2/core/mat.hpp(1965): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>D:\Program Files\opencv\build\include\opencv2/core/persistence.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>D:\Program Files\opencv\build\include\opencv2/core/utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+     1>SceneAnnotationDlg.cpp(834): warning C4018: “<”: 有符号/无符号不匹配
+       Link:
+         D:\Program Files\vs2013\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\Release\SceneAnnotation.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"D:\Program Files\opencv\build\x86\vc12\lib" /LIBPATH:E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\SceneAnnotation\json\lib\Release opencv_ts300.lib opencv_world300.lib json_vc71_libmt.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"D:\Program Files\vs2013\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\Release\SceneAnnotation.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /ENTRY:"wWinMainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\Release\SceneAnnotation.lib" /MACHINE:X86 /SAFESEH Release\SceneAnnotation.res
+         Release\CvvImage.obj
+         Release\IOFile.obj
+         Release\SceneAnnotation.obj
+         Release\SceneAnnotationDlg.obj
+         Release\stdafx.obj
+         正在生成代码
+         已完成代码的生成
+         SceneAnnotation.vcxproj -> E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\Release\SceneAnnotation.exe
+     1>已完成生成项目“E:\WenbinWang\Method\Anno_COCO\SceneAnnotation\SceneAnnotation\SceneAnnotation.vcxproj”(Build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:06.27
