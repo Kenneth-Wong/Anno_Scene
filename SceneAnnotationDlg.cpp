@@ -139,8 +139,6 @@ BOOL CSceneAnnotationDlg::OnInitDialog()
 	GetDlgItem(IDC_STATIC4)->SetWindowText(L"(0/0)");
 
 
-	//读取预测信息
-	ReadDataFiles();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -210,7 +208,7 @@ int CSceneAnnotationDlg::ReadConfigFile(const CString& dir_path)
 * 读取预测标注文件，分别读取train，val，test的场景和属性预测标注
 * 场景预测给出前20个标签，属性预测给出前10个标签
 */
-void CSceneAnnotationDlg::ReadDataFiles()
+void CSceneAnnotationDlg::ReadDataFiles(int TYPE)
 {
 	ifstream f;
 	f.open(PLACES);
@@ -248,31 +246,21 @@ void CSceneAnnotationDlg::ReadDataFiles()
 	string path[6] = { TRAIN14_CLASS, VAL14_CLASS, TEST15_CLASS, TRAIN14_ATTR, VAL14_ATTR, TEST15_ATTR};
 	int label,len;
 
-#ifdef DEBUG
-	int k = 1;
-	int stop = 5;
-#else
-	int k = 0;
-	int stop = 6;
-#endif
-	for (; k < stop; k++)
+	int k[2] = { TYPE, TYPE + 3 };
+	for (int i = 0; i < 2; i++)
 	{
-#ifdef DEBUG
-		if (k != 1 && k != 4)
-			continue;
-#endif
-		f.open(path[k]);
+		f.open(path[k[i]]);
 		while (!f.eof())
 		{
 			vector<char16_t> tmp;
-			len = k>2 ? 10 : 20;
+			len = k[i]>2 ? 10 : 20;
 			for (int i = 0; i < len; i++)
 			{
 				f >> label;
 				tmp.push_back((char16_t)label);
 			}
 			WARN(tmp.size() == len, "Something wrong when loading the data files!")
-			(*(p[k])).push_back(tmp);
+				(*(p[k[i]])).push_back(tmp);
 		}
 		f.close();
 	}
@@ -369,6 +357,8 @@ void CSceneAnnotationDlg::OnEnChangeEditbrowse()
 	WARN(json_image_num == m_allImgVec.size(), "Images NUM is not compatible with declaration in config file!");
 	
 	WARN(((LPCSTR)CStringA(prefix)) == json_type, "Direction name is not compatible with declaration in config file!");
+
+	ReadDataFiles((prefix=="train"?TRAIN:(prefix=="val"?VAL:TEST)));
 
 	// initialize the image state
 	state.resize(m_allImgVec.size(), (char)0);

@@ -26,9 +26,9 @@
 #define SAVE_TEST "Annotation\\test2015.json"
 
 #else // Release 模式，正式发布时加_n
-#define TRAIN14 "train2014"
-#define VAL14 "val2014"
-#define TEST15 "test2015"
+#define TRAIN 0
+#define VAL 1
+#define TEST 2
 #define SAVE_TRAIN "Annotation\\train2014.json"
 #define SAVE_VAL "Annotation\\val2014.json"
 #define SAVE_TEST "Annotation\\test2015.json"

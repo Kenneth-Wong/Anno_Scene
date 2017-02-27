@@ -83,7 +83,7 @@ public:
 	void DrawPicToHDC(IplImage* img, UINT ID);
 	void DrawPic(int showIdx);
 	void ScanDiskFile(const CString& strPath);
-	void ReadDataFiles();
+	void ReadDataFiles(int TYPE);
 	int ReadConfigFile(const CString& dir_path);
 	void SetRadioNames(int showIdx);
 	void SetCheckNames(int showIdx);
