@@ -17,21 +17,19 @@
 #define SAMPLEROOT "Readable\\samples\\"
 #define SAVEROOT "Annotation\\"
 
-#ifdef DEBUG
+
 #define TRAIN14 "train2014"
 #define VAL14 "val2014"
 #define TEST15 "test2015"
-#define SAVE_TRAIN "Annotation\\train2014.json"
-#define SAVE_VAL "Annotation\\val2014.json"
-#define SAVE_TEST "Annotation\\test2015.json"
 
-#else // Release 模式，正式发布时加_n
+
 #define TRAIN 0
 #define VAL 1
 #define TEST 2
-#define SAVE_TRAIN "Annotation\\train2014.json"
-#define SAVE_VAL "Annotation\\val2014.json"
-#define SAVE_TEST "Annotation\\test2015.json"
-#endif
+
+#define TRAIN_NUM 82783
+#define VAL_NUM 40504
+#define TEST_NUM 81434
+
 
 #endif

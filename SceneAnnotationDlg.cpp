@@ -10,6 +10,7 @@
 #define new DEBUG_NEW
 #endif
 
+static CString getName(CString path);
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
@@ -210,24 +211,30 @@ int CSceneAnnotationDlg::ReadConfigFile(const CString& dir_path)
 */
 void CSceneAnnotationDlg::ReadDataFiles(int TYPE)
 {
-	ifstream f;
-	f.open(PLACES);
+	ifstream f; 
+	f.open(PLACES); 
 	uchar io;
 	string e_name;
-	string c_name; CString c;
-
-	while (!f.eof())
+	string c_name; 
+	CString c;
+	m_classes.swap(vector<scene>());
+	m_classes.reserve(205);	
+	for (int i = 0; i < 205;i++)
 	{
-		f >> io >> e_name >> c_name;
+		f >> io >> e_name >> c_name; 
+		
 		c = c_name.c_str();
 		m_classes.push_back(scene(io, e_name, c));
+		
 	}
 	f.close();
 	WARN(m_classes.size() == 205, "Classes NUM is not 205!")
 
-
+	
 	f.open(ATTRIBUTE);
-	while (!f.eof())
+	m_attributes.swap(vector<attribute>());
+	m_attributes.reserve(102);
+	for (int i = 0; i < 102;i++)
 	{
 		f >> e_name >> c_name;
 		c = c_name.c_str();
@@ -235,7 +242,7 @@ void CSceneAnnotationDlg::ReadDataFiles(int TYPE)
 	}
 	f.close();
 	WARN(m_attributes.size() == 102, "Attributes NUM is not 102!")
-
+	
 	vector< vector<char16_t> > *p[6];
 	p[0] = &m_pr_scene_train;
 	p[1] = &m_pr_scene_val;
@@ -247,21 +254,23 @@ void CSceneAnnotationDlg::ReadDataFiles(int TYPE)
 	int label,len;
 
 	int k[2] = { TYPE, TYPE + 3 };
+	int num[3] = { TRAIN_NUM, VAL_NUM, TEST_NUM };
 	for (int i = 0; i < 2; i++)
 	{
 		f.open(path[k[i]]);
-		while (!f.eof())
+		for (int q = 0; q < num[TYPE];q++)
 		{
 			vector<char16_t> tmp;
 			len = k[i]>2 ? 10 : 20;
-			for (int i = 0; i < len; i++)
+			for (int j = 0; j < len; j++)
 			{
 				f >> label;
 				tmp.push_back((char16_t)label);
 			}
 			WARN(tmp.size() == len, "Something wrong when loading the data files!")
-				(*(p[k[i]])).push_back(tmp);
+			(*(p[k[i]])).push_back(tmp);
 		}
+		WARN((*(p[k[i]])).size()==num[TYPE], "Something wrong when loading the data files!")
 		f.close();
 	}
 #ifdef DEBUG
@@ -333,7 +342,6 @@ void CSceneAnnotationDlg::OnEnChangeEditbrowse()
 	
 	/// Init all
 	m_allImgVec.clear();
-	m_allImgName.clear();
 	state.clear();
 	showIdx = 0;
 	num_commit = 0;
@@ -346,7 +354,7 @@ void CSceneAnnotationDlg::OnEnChangeEditbrowse()
 	int x = dir.ReverseFind('_');
 	CString prefix = dir.Left(x);
 	WARN(prefix == "train" || prefix == "val" || prefix == "test", "Invalid direction name!");
-
+	
 		
 	ScanDiskFile(path);
 
@@ -359,6 +367,8 @@ void CSceneAnnotationDlg::OnEnChangeEditbrowse()
 	WARN(((LPCSTR)CStringA(prefix)) == json_type, "Direction name is not compatible with declaration in config file!");
 
 	ReadDataFiles((prefix=="train"?TRAIN:(prefix=="val"?VAL:TEST)));
+
+	
 
 	// initialize the image state
 	state.resize(m_allImgVec.size(), (char)0);
@@ -388,14 +398,11 @@ void CSceneAnnotationDlg::OnEnChangeEditbrowse()
 	}
 	
 	WARN(m_annotated.size() <= m_allImgVec.size(), "Annotation NUM is not compatible with that of Imags NUM!");
-
+	
 	// set state and get image's name
 	for (size_t i = 0; i < m_allImgVec.size(); i++)
 	{
-		CString name = m_allImgVec[i];
-		int n = name.ReverseFind('\\');
-		name.Delete(0, n + 1);
-		m_allImgName.push_back(name);
+		CString name = getName(m_allImgVec[i]);
 		if (m_annotated.count(name)>0)
 			state[i] = (char)1;
 	}
@@ -428,7 +435,7 @@ void CSceneAnnotationDlg::OnEnChangeEditbrowse()
 	CString info;
 	info.Format(L"(%d/%d)", num_commit, m_allImgVec.size());
 	GetDlgItem(IDC_STATIC4)->SetWindowText(info);
-
+//MessageBox(L"OK!");
 	// 注意显示的图和设置备注信息是从m_allImgVec读取的，
 	// 以 showIdx 为索引读取备注信息都是全局索引，要加上start_id
 	DrawPic(showIdx);
@@ -616,7 +623,7 @@ void CSceneAnnotationDlg::OnBnClickedEnsure()
 	info.Format(L"(%d/%d)", num_commit, m_allImgVec.size());
 	GetDlgItem(IDC_STATIC4)->SetWindowText(info);
 
-	string img_name = ((LPCSTR)CStringA(m_allImgName[showIdx]));
+	string img_name = ((LPCSTR)CStringA(getName(m_allImgVec[showIdx])));
 	if (m_class_sel == 10)
 		sel_class = -1;
 	else
@@ -628,12 +635,12 @@ void CSceneAnnotationDlg::OnBnClickedEnsure()
 
 	// 写到文件中，同时更新m_annotated
 	io->WriteKeyToJsonFile(save_annotated, img_name, sel_class, attr);
-	if (m_annotated.count(m_allImgName[showIdx]) == 0)
-		m_annotated.insert(pair<CString, Annotation>(m_allImgName[showIdx], Annotation(sel_class, attr)));
+	if (m_annotated.count(getName(m_allImgVec[showIdx])) == 0)
+		m_annotated.insert(pair<CString, Annotation>(getName(m_allImgVec[showIdx]), Annotation(sel_class, attr)));
 	else
 	{
-		m_annotated[m_allImgName[showIdx]].scene_id = sel_class;
-		m_annotated[m_allImgName[showIdx]].attr = attr;
+		m_annotated[getName(m_allImgVec[showIdx])].scene_id = sel_class;
+		m_annotated[getName(m_allImgVec[showIdx])].attr = attr;
 	}
 
 	WARN(showIdx + 1 < m_allImgVec.size(), "This is the final image!");
@@ -765,7 +772,7 @@ void CSceneAnnotationDlg::OnLButtonDown(UINT nFlags, CPoint point)
 void CSceneAnnotationDlg::SetRadioState(int showIdx)
 {
 	// 获取当前图片名
-	CString key = m_allImgName[showIdx];
+	CString key = getName(m_allImgVec[showIdx]);
 
 	if (m_annotated.size() == 0 || m_annotated.count(key) == 0) //无标注信息
 	{
@@ -775,7 +782,7 @@ void CSceneAnnotationDlg::SetRadioState(int showIdx)
 	{
 		Annotation anno = m_annotated[key];
 		// 读取所选的类别和属性在前20个属性中的id
-		int sel_id;
+		int sel_id = -2;
 		if (anno.scene_id == -1) //无标签
 			sel_id = -1;
 		else{
@@ -791,6 +798,10 @@ void CSceneAnnotationDlg::SetRadioState(int showIdx)
 		if (sel_id==-1)
 		{
 			m_class_sel = 10;// NONE
+		}
+		else if (sel_id == -2) // json BUG *********************************
+		{
+			m_class_sel = 0;
 		}
 		else
 		{
@@ -813,7 +824,7 @@ void CSceneAnnotationDlg::SetRadioState(int showIdx)
 
 void CSceneAnnotationDlg::SetCheckBoxState(int showIdx)
 {
-	CString key = m_allImgName[showIdx];
+	CString key = getName(m_allImgVec[showIdx]);
 	for (int i = 0; i < 10; i++)
 		((CButton*)GetDlgItem(IDC_CHECK1 + i))->SetCheck(BST_UNCHECKED);
 
@@ -834,4 +845,11 @@ void CSceneAnnotationDlg::SetCheckBoxState(int showIdx)
 		}
 	}
 	UpdateData(false);
+}
+
+static CString getName(CString path)
+{
+	CString name = path;
+	name.Delete(0, name.ReverseFind('\\') + 1);
+	return name;
 }

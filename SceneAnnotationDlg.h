@@ -89,7 +89,7 @@ public:
 	void SetCheckNames(int showIdx);
 	void showSamples(int showIdx);
 	vector<CString> m_allImgVec;
-	vector<CString> m_allImgName;
+	//vector<CString> m_allImgName;
 	unsigned int showIdx;
 	int groupRadio;
 	afx_msg void OnBnClickedButton3();
@@ -106,8 +106,6 @@ public:
 	vector< vector<char16_t> > m_pr_scene_train, m_pr_scene_val, m_pr_scene_test;
 	vector< vector<char16_t> > m_pr_attr_train, m_pr_attr_val, m_pr_attr_test;
 	vector <vector<char16_t> > *p_scene, *p_attr;
-	ofstream ofs;
-	ifstream ifs;
 	int m_class_sel;//Ñ¡ÔñµÄ¿Ø¼þid
 	afx_msg void OnBnClickedRadio1();
 	afx_msg void OnBnClickedChangeGroup();

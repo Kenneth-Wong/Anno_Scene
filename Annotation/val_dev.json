@@ -1,7 +1,7 @@
 {
    "COCO_val2014_000000000074.jpg" : {
-      "scene_attribute" : [ 48, 74, 88 ],
-      "scene_class" : 2
+      "scene_attribute" : [ 48, 74, 89 ],
+      "scene_calss" : 2
    },
    "COCO_val2014_000000000133.jpg" : {
       "scene_attribute" : [ 56, 85, 88, 91 ],
