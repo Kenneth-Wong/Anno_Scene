@@ -5,6 +5,7 @@
 #include "CvvImage.h"
 #include "afxcmn.h"
 #include <map>
+#include <set>
 #include <iostream>
 #include <fstream>
 #include "json.h"
@@ -22,6 +23,12 @@ if(!(c))\
 	MessageBox(_T(m));\
 	return;\
 };
+
+#define WARN_NO_RETURN(c, m) \
+	if(!(c))\
+	{\
+		MessageBox(_T(m));\
+	}
 
 	
 
@@ -45,11 +52,19 @@ public:
 typedef SceneAttribute attribute;
 
 struct Annotation{
-	int scene_id;
-	vector<int> attr;
+	char16_t scene_id;
+	vector<char16_t> attr;
 public:
 	Annotation(){}
-	Annotation(int s_, const vector<int> a_) :scene_id(s_), attr(a_){}
+	Annotation(char16_t s_, const vector<char16_t> a_) :scene_id(s_), attr(a_){}
+};
+
+struct Prediction{
+	vector<char16_t> scene;
+	vector<char16_t> attr;
+public:
+	Prediction(){}
+	Prediction(const vector<char16_t> s_, const vector<char16_t> a_) :scene(s_), attr(a_){}
 };
 
 // CSceneAnnotationDlg 对话框
@@ -85,10 +100,12 @@ public:
 	void ScanDiskFile(const CString& strPath);
 	void ReadDataFiles(int TYPE);
 	int ReadConfigFile(const CString& dir_path);
-	void SetRadioNames(int showIdx);
-	void SetCheckNames(int showIdx);
-	void showSamples(int showIdx);
+	void SetRadioNames(CString key);
+	void SetCheckNames(CString key);
+	void showSamples(CString key);
 	vector<CString> m_allImgVec;
+	vector<CString> m_allImgName;
+	set<CString> m_NoneAnnotated;
 	//vector<CString> m_allImgName;
 	unsigned int showIdx;
 	int groupRadio;
@@ -98,14 +115,16 @@ public:
 	afx_msg void OnStnClickedStatic3();
 	afx_msg void OnBnClickedEnsure();
 	int num_commit;
-	vector<char> state;
+	//vector<char> state;
 	HACCEL m_ACCcommit;
 	//virtual BOOL PreTranslateMessage(MSG* pMsg);
 	vector<attribute> m_attributes;
 	vector<scene> m_classes;
-	vector< vector<char16_t> > m_pr_scene_train, m_pr_scene_val, m_pr_scene_test;
-	vector< vector<char16_t> > m_pr_attr_train, m_pr_attr_val, m_pr_attr_test;
-	vector <vector<char16_t> > *p_scene, *p_attr;
+	map<CString, Prediction> m_pr_train, m_pr_val, m_pr_test;
+	map<CString, Prediction> *p_pr;
+	//vector< vector<char16_t> > m_pr_scene_train, m_pr_scene_val, m_pr_scene_test;
+	//vector< vector<char16_t> > m_pr_attr_train, m_pr_attr_val, m_pr_attr_test;
+	//vector <vector<char16_t> > *p_scene, *p_attr;
 	int m_class_sel;//选择的控件id
 	afx_msg void OnBnClickedRadio1();
 	afx_msg void OnBnClickedChangeGroup();
@@ -118,7 +137,14 @@ public:
 	int end_id;
 	CIOFile* io;
 	map<CString, Annotation> m_annotated;
-	void SetRadioState(int showIdx);
-	void SetCheckBoxState(int showIdx);
+	void SetRadioState(CString key);
+	void SetCheckBoxState(CString key);
+	void ShowNextImage();
 	int sel_class;//真正的场景id
+	afx_msg void OnBnClickedOk();
+	afx_msg void OnBnClickedCancel();
+	int m_language;
+	afx_msg void OnBnClickedRadio13();
+	CString m_globalIdx;
+	afx_msg void OnBnClickedGo();
 };

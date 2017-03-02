@@ -25,7 +25,7 @@ int CIOFile::ParseJson(const string& file_path, Json::Value &root)
 	else return 0;
 }
 
-int CIOFile::ReadKeyFromJsonFile(const string& file_path, const string& image_name, int& scene_class, vector<int>& attr)
+int CIOFile::ReadKeyFromJsonFile(const string& file_path, const string& image_name, int& scene_class, vector<char16_t>& attr)
 {
 	if (!isFile(file_path))
 		return 0; // file not exists
@@ -49,11 +49,11 @@ int CIOFile::ReadKeyFromJsonFile(const string& file_path, const string& image_na
 		return -2; // file is wrong
 	
 }
-int CIOFile::WriteKeyToJsonFile(const string& file_path, const string& image_name, const int scene_calss, const vector<int> attr)
+int CIOFile::WriteKeyToJsonFile(const string& file_path, const string& image_name, const int scene_class, const vector<char16_t> attr)
 {
 	ofstream ofs;
 	int o_class;
-	vector<int> o_attr;
+	vector<char16_t> o_attr;
 	int res = ReadKeyFromJsonFile(file_path, image_name, o_class, o_attr);
 
 	if (res == 0) // file not exists, wirte it directly.
@@ -61,12 +61,12 @@ int CIOFile::WriteKeyToJsonFile(const string& file_path, const string& image_nam
 		ofs.open(file_path);
 		Json::Value root, info;
 		Json::StyledWriter writer;
-		info["scene_class"] = Json::Value(scene_calss);
+		info["scene_class"] = Json::Value(scene_class);
 		if (attr.size() == 0)
 			info["scene_attribute"].resize(0);
 		else
 		{
-			vector<int> tmp = attr;
+			vector<char16_t> tmp = attr;
 			sort(tmp.begin(), tmp.end());
 			for (size_t i = 0; i < tmp.size(); i++)
 				info["scene_attribute"].append(tmp[i]);
@@ -82,12 +82,12 @@ int CIOFile::WriteKeyToJsonFile(const string& file_path, const string& image_nam
 		Json::StyledWriter writer;
 		ParseJson(file_path, root);
 		ofs.open(file_path);
-		info["scene_class"] = Json::Value(scene_calss);
+		info["scene_class"] = Json::Value(scene_class);
 		if (attr.size() == 0)
 			info["scene_attribute"].resize(0);
 		else
 		{
-			vector<int> tmp = attr;
+			vector<char16_t> tmp = attr;
 			sort(tmp.begin(), tmp.end());
 			for (size_t i = 0; i < tmp.size(); i++)
 				info["scene_attribute"].append(tmp[i]);
@@ -104,22 +104,44 @@ int CIOFile::WriteKeyToJsonFile(const string& file_path, const string& image_nam
 			Json::Value root;
 			ParseJson(file_path, root);
 			ofs.open(file_path);
-			Json::StyledWriter writer;
 			Json::Value& info = root[image_name];
-			info.removeMember("scene_class");
-			info["scene_calss"] = Json::Value(scene_calss);
+			info["scene_class"] = Json::Value(scene_class);
 			info["scene_attribute"].clear();
 			if (attr.size() == 0)
 				info["scene_attribute"].resize(0);
 			else
 			{
-				vector<int> tmp = attr;
+				vector<char16_t> tmp = attr;
 				sort(tmp.begin(), tmp.end());
 				for (size_t i = 0; i < tmp.size(); i++)
 					info["scene_attribute"].append(tmp[i]);
 			}
+			Json::StyledWriter writer;
 			ofs << writer.write(root);
 			ofs.close();
+			/*Json::Value::Members mem = root.getMemberNames();
+			for (auto iter = mem.begin(); iter != mem.end(); iter++)
+			{
+				if (*iter != image_name)
+					root2[*iter] = root[*iter];
+				else
+				{
+					Json::Value info;
+					info["scene_class"] = Json::Value(scene_calss);
+					info["scene_attribute"].clear();
+					if (attr.size() == 0)
+						info["scene_attribute"].resize(0);
+					else
+					{
+						vector<char16_t> tmp = attr;
+						sort(tmp.begin(), tmp.end());
+						for (size_t i = 0; i < tmp.size(); i++)
+							info["scene_attribute"].append(tmp[i]);
+					}
+					root2[image_name] = info;
+				}
+			}*/
+			
 		}
 		
 	}

@@ -54,13 +54,16 @@ CSceneAnnotationDlg::CSceneAnnotationDlg(CWnd* pParent /*=NULL*/)
 	, num_commit(0)
 	, m_class_sel(0)
 	, groupRadio(0)
-	, p_scene(0)
-	, p_attr(0)
+	, p_pr(0)
+	//, p_scene(0)
+	//, p_attr(0)
 	, json_start_id(0)
 	, json_package_id(0)
 	, json_image_num(0)
 	, end_id(0)
 	, sel_class(0)
+	, m_language(0)
+	, m_globalIdx(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_ACCcommit = ::LoadAccelerators(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_ACCELERATOR1));
@@ -73,6 +76,8 @@ void CSceneAnnotationDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_PROGRESS1, m_pro);
 	DDX_Radio(pDX, IDC_RADIO1, m_class_sel);
+	DDX_Radio(pDX, IDC_RADIO13, m_language);
+	DDX_Text(pDX, IDC_EDIT1, m_globalIdx);
 }
 
 BEGIN_MESSAGE_MAP(CSceneAnnotationDlg, CDialogEx)
@@ -95,8 +100,14 @@ BEGIN_MESSAGE_MAP(CSceneAnnotationDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_RADIO9, &CSceneAnnotationDlg::OnBnClickedRadio1)
 	ON_BN_CLICKED(IDC_RADIO10, &CSceneAnnotationDlg::OnBnClickedRadio1)
 	ON_BN_CLICKED(IDC_RADIO11, &CSceneAnnotationDlg::OnBnClickedRadio1)
+	ON_BN_CLICKED(IDC_RADIO12, &CSceneAnnotationDlg::OnBnClickedRadio1)
 	ON_BN_CLICKED(IDC_GROUP, &CSceneAnnotationDlg::OnBnClickedChangeGroup)
 	ON_WM_LBUTTONDOWN()
+	ON_BN_CLICKED(IDOK, &CSceneAnnotationDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDCANCEL, &CSceneAnnotationDlg::OnBnClickedCancel)
+	ON_BN_CLICKED(IDC_RADIO13, &CSceneAnnotationDlg::OnBnClickedRadio13)
+	ON_BN_CLICKED(IDC_RADIO14, &CSceneAnnotationDlg::OnBnClickedRadio13)
+	ON_BN_CLICKED(IDC_GO, &CSceneAnnotationDlg::OnBnClickedGo)
 END_MESSAGE_MAP()
 
 
@@ -136,6 +147,40 @@ BOOL CSceneAnnotationDlg::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化代码
 
+	/****************************************************************/
+	// 加载places和attribute标签
+	ifstream f;
+	f.open(PLACES);
+	uchar io;
+	string e_name;
+	string c_name;
+	CString c;
+	m_classes.swap(vector<scene>());
+	m_classes.reserve(205);
+	for (int i = 0; i < 205; i++)
+	{
+		f >> io >> e_name >> c_name;
+
+		c = c_name.c_str();
+		m_classes.push_back(scene(io, e_name, c));
+
+	}
+	f.close();
+	//WARN(m_classes.size() == 205, "Classes NUM is not 205!");
+
+	f.open(ATTRIBUTE);
+	m_attributes.swap(vector<attribute>());
+	m_attributes.reserve(102);
+	for (int i = 0; i < 102; i++)
+	{
+		f >> e_name >> c_name;
+		c = c_name.c_str();
+		m_attributes.push_back(attribute(e_name, c));
+	}
+	f.close();
+	/****************************************************************/
+
+	//WARN(m_attributes.size() == 102, "Attributes NUM is not 102!");
 	m_pro.SetPos(0);
 	GetDlgItem(IDC_STATIC4)->SetWindowText(L"(0/0)");
 
@@ -167,27 +212,12 @@ int CSceneAnnotationDlg::ReadConfigFile(const CString& dir_path)
 	Json::Value root;
 	if (j_reader.parse(ifs, root))
 	{
-		json_image_num = root["image_num"].asInt();
-		json_start_id = root["start_id"].asInt();
-		if (!root["start_id"].isNull())
-			json_start_id = root["start_id"].asInt();
-		else
-		{
-			MessageBox(L"Parameter start_id not exist!");
-			return 0;
-		}
+
 		if (!root["image_num"].isNull())
 			json_image_num = root["image_num"].asInt();
 		else
 		{
 			MessageBox(L"Parameter image_num not exist!");
-			return 0;
-		}
-		if (!root["package_id"].isNull())
-			json_package_id = root["package_id"].asInt();
-		else
-		{
-			MessageBox(L"Parameter package_id not exist!");
 			return 0;
 		}
 		if (!root["type"].isNull())
@@ -211,67 +241,42 @@ int CSceneAnnotationDlg::ReadConfigFile(const CString& dir_path)
 */
 void CSceneAnnotationDlg::ReadDataFiles(int TYPE)
 {
-	ifstream f; 
-	f.open(PLACES); 
-	uchar io;
-	string e_name;
-	string c_name; 
-	CString c;
-	m_classes.swap(vector<scene>());
-	m_classes.reserve(205);	
-	for (int i = 0; i < 205;i++)
-	{
-		f >> io >> e_name >> c_name; 
-		
-		c = c_name.c_str();
-		m_classes.push_back(scene(io, e_name, c));
-		
-	}
-	f.close();
-	WARN(m_classes.size() == 205, "Classes NUM is not 205!")
+	
+	map< CString, Prediction> *p[3];
+	p[0] = &m_pr_train;
+	p[1] = &m_pr_val;
+	p[2] = &m_pr_test;
+	if ((*p[TYPE]).size() != 0) // 如果已经加载，则不用重新加载
+		return;
 
-	
-	f.open(ATTRIBUTE);
-	m_attributes.swap(vector<attribute>());
-	m_attributes.reserve(102);
-	for (int i = 0; i < 102;i++)
-	{
-		f >> e_name >> c_name;
-		c = c_name.c_str();
-		m_attributes.push_back(attribute(e_name, c));
-	}
-	f.close();
-	WARN(m_attributes.size() == 102, "Attributes NUM is not 102!")
-	
-	vector< vector<char16_t> > *p[6];
-	p[0] = &m_pr_scene_train;
-	p[1] = &m_pr_scene_val;
-	p[2] = &m_pr_scene_test;
-	p[3] = &m_pr_attr_train;
-	p[4] = &m_pr_attr_val;
-	p[5] = &m_pr_attr_test;
+	ifstream f, f2; 
 	string path[6] = { TRAIN14_CLASS, VAL14_CLASS, TEST15_CLASS, TRAIN14_ATTR, VAL14_ATTR, TEST15_ATTR};
-	int label,len;
+	char16_t label;
+	string img_name, img_name2; 
+	CString IMG_NAME;
 
-	int k[2] = { TYPE, TYPE + 3 };
 	int num[3] = { TRAIN_NUM, VAL_NUM, TEST_NUM };
-	for (int i = 0; i < 2; i++)
+
+	f.open(path[TYPE]);
+	f2.open(path[TYPE + 3]);
+	for (int q = 0; q < num[TYPE]; q++)
 	{
-		f.open(path[k[i]]);
-		for (int q = 0; q < num[TYPE];q++)
+		f >> img_name; 
+		f2 >> img_name2;
+		assert(img_name == img_name2);
+		IMG_NAME = img_name.c_str();
+		vector<char16_t> scene_tmp, attr_tmp;
+		for (int j = 0; j < 20; j++)
 		{
-			vector<char16_t> tmp;
-			len = k[i]>2 ? 10 : 20;
-			for (int j = 0; j < len; j++)
-			{
-				f >> label;
-				tmp.push_back((char16_t)label);
-			}
-			WARN(tmp.size() == len, "Something wrong when loading the data files!")
-			(*(p[k[i]])).push_back(tmp);
+			f >> label;
+			scene_tmp.push_back(label);
 		}
-		WARN((*(p[k[i]])).size()==num[TYPE], "Something wrong when loading the data files!")
-		f.close();
+		for (int j = 0; j < 10; j++)
+		{
+			f2 >> label;
+			attr_tmp.push_back(label);
+		}
+		(*p[TYPE]).insert(pair<CString, Prediction>(IMG_NAME, Prediction(scene_tmp, attr_tmp)));
 	}
 #ifdef DEBUG
 	MessageBox(L"Completed");
@@ -342,8 +347,13 @@ void CSceneAnnotationDlg::OnEnChangeEditbrowse()
 	
 	/// Init all
 	m_allImgVec.clear();
-	state.clear();
+	m_allImgName.clear();
+	m_NoneAnnotated.clear();
+	m_annotated.clear();
+	//state.clear();
 	showIdx = 0;
+	m_globalIdx = _T("");
+	UpdateData(false);
 	num_commit = 0;
 	groupRadio = 0;
 	
@@ -371,7 +381,7 @@ void CSceneAnnotationDlg::OnEnChangeEditbrowse()
 	
 
 	// initialize the image state
-	state.resize(m_allImgVec.size(), (char)0);
+	//state.resize(m_allImgVec.size(), (char)0);
 
 	// load annoted_file
 	save_annotated = SAVEROOT; 
@@ -388,44 +398,32 @@ void CSceneAnnotationDlg::OnEnChangeEditbrowse()
 			CString c_i_name(i_name.c_str());
 			Json::Value info = root[*iter];
 			int scene = info["scene_class"].asInt();
-			vector<int> attr;
+			vector<char16_t> attr;
 			for (size_t i = 0; i < info["scene_attribute"].size(); i++)
 			{
-				attr.push_back(info["scene_attribute"][i].asInt());
+				attr.push_back((char16_t)info["scene_attribute"][i].asInt());
 			}
-			m_annotated.insert(pair<CString, Annotation>(c_i_name, Annotation(scene, attr)));
+			m_annotated.insert(pair<CString, Annotation>(c_i_name, Annotation((char16_t)scene, attr)));
 		}
 	}
 	
-	WARN(m_annotated.size() <= m_allImgVec.size(), "Annotation NUM is not compatible with that of Imags NUM!");
+	WARN_NO_RETURN(m_annotated.size() <= m_allImgVec.size(), "NOTE: Annotation NUM is larger than that of Images NUM!");
 	
 	// set state and get image's name
 	for (size_t i = 0; i < m_allImgVec.size(); i++)
 	{
 		CString name = getName(m_allImgVec[i]);
-		if (m_annotated.count(name)>0)
-			state[i] = (char)1;
+		m_allImgName.push_back(name);
+		if (m_annotated.count(name) == 0)
+			m_NoneAnnotated.insert(name);
 	}
 
-	end_id = json_start_id + json_image_num - 1;
+	num_commit = m_annotated.size() <= m_allImgVec.size() ? m_annotated.size() : m_allImgVec.size();
 
-	num_commit = m_annotated.size();
 
-	if (json_type == "train")
-	{
-		p_scene = &m_pr_scene_train;
-		p_attr = &m_pr_attr_train;
-	}
-	else if (json_type == "val")
-	{
-		p_scene = &m_pr_scene_val;
-		p_attr = &m_pr_attr_val;
-	}
-	else if (json_type == "test")
-	{
-		p_scene = &m_pr_scene_test;
-		p_attr = &m_pr_attr_test;
-	}
+	p_pr = json_type == "train" ? &m_pr_train : (json_type == "val" ? &m_pr_val : (json_type == "test" ? &m_pr_test : 0));
+	WARN(p_pr, "Parameter json_type in illegal!");
+
 
 	//set the progress bar
 	m_pro.SetRange(0, m_allImgVec.size());
@@ -435,43 +433,88 @@ void CSceneAnnotationDlg::OnEnChangeEditbrowse()
 	CString info;
 	info.Format(L"(%d/%d)", num_commit, m_allImgVec.size());
 	GetDlgItem(IDC_STATIC4)->SetWindowText(info);
+
+	m_globalIdx.Format(L"%d", showIdx + 1);
+	UpdateData(false);
+	GetDlgItem(IDC_IMGNAME)->SetWindowText(m_allImgName[showIdx]);
+
 //MessageBox(L"OK!");
-	// 注意显示的图和设置备注信息是从m_allImgVec读取的，
-	// 以 showIdx 为索引读取备注信息都是全局索引，要加上start_id
-	DrawPic(showIdx);
-	SetRadioState(showIdx);
-	SetCheckBoxState(showIdx);
-	SetRadioNames(showIdx+json_start_id);
-	SetCheckNames(showIdx+json_start_id);
-	showSamples(showIdx+json_start_id);
+
+	// 如果全部标注，则根据showidx显示一张
+	CString key;
+	if (m_NoneAnnotated.size() == 0)
+	{
+		key = m_allImgName[showIdx];
+		DrawPic(showIdx);
+		SetRadioState(key);
+		SetCheckBoxState(key);
+		SetRadioNames(key);
+		SetCheckNames(key);
+		showSamples(key);
+	}
+	else
+	{
+		key = *m_NoneAnnotated.begin();
+		vector<CString>::iterator iter = find(m_allImgName.begin(), m_allImgName.end(), key);
+		if (iter != m_allImgName.end())
+			showIdx = iter - m_allImgName.begin();
+		DrawPic(showIdx);
+		SetRadioState(key);
+		SetCheckBoxState(key);
+		SetRadioNames(key);
+		SetCheckNames(key);
+		showSamples(key);
+	}
+
 	
-	
-	GetDlgItem(IDC_STATIC6)->SetWindowText(state[showIdx] ? L"已标注" : L"未标注");
+	GetDlgItem(IDC_STATIC6)->SetWindowText(m_annotated.count(key) ? L"已标注" : L"未标注");
 
 }
 
-void CSceneAnnotationDlg::SetRadioNames(int showIdx)
+void CSceneAnnotationDlg::SetRadioNames(CString key)
 {
-	for (int i = 0; i < 10; i++)
+	if (!m_language)
 	{
-		GetDlgItem(1018 + i)->SetWindowText(m_classes[(*p_scene)[showIdx][i + groupRadio]].c_name);
+		for (int i = 0; i < 10; i++)
+		{
+			GetDlgItem(1018 + i)->SetWindowText(m_classes[(*p_pr)[key].scene[i + groupRadio]].c_name);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			CString ename(m_classes[(*p_pr)[key].scene[i + groupRadio]].e_name.c_str());
+			GetDlgItem(1018 + i)->SetWindowText(ename);
+		}
 	}
 }
 
-void CSceneAnnotationDlg::SetCheckNames(int showIdx)
+void CSceneAnnotationDlg::SetCheckNames(CString key)
 {
-	for (int i = 0; i < 10; i++)
+	if (!m_language)
 	{
-		GetDlgItem(IDC_CHECK1 + i)->SetWindowText(m_attributes[(*p_attr)[showIdx][i]].c_name);
+		for (int i = 0; i < 10; i++)
+		{
+			GetDlgItem(IDC_CHECK1 + i)->SetWindowText(m_attributes[(*p_pr)[key].attr[i]].c_name);
+		}
+	}
+	else
+	{
+		
+		for (int i = 0; i < 10; i++)
+		{
+			GetDlgItem(IDC_CHECK1 + i)->SetWindowText(CString(m_attributes[(*p_pr)[key].attr[i]].e_name.c_str()));
+		}
 	}
 }
 
-void CSceneAnnotationDlg::showSamples(int showIdx)
+void CSceneAnnotationDlg::showSamples(CString key)
 {
 	CString root = _T(SAMPLEROOT);
 	for (int i = 0; i < NUM_SAMPLE / 2; i++)
 	{
-		int pr_label = (*p_scene)[showIdx][i + groupRadio];
+		int pr_label = (*p_pr)[key].scene[i + groupRadio];
 		char p[5];
 		sprintf(p, "%d", pr_label);
 		CString path = root + p + _T("\\*.*");
@@ -562,17 +605,7 @@ void CSceneAnnotationDlg::OnBnClickedButton3()
 	// TODO:  在此添加控件通知处理程序代码
 	if (m_allImgVec.size() == 0)
 		return;
-	WARN(showIdx + 1 < m_allImgVec.size(), "This is the final image!");
-	showIdx++;
-	DrawPic(showIdx);
-	groupRadio = 0;
-	SetRadioState(showIdx);
-	SetCheckBoxState(showIdx);
-	SetRadioNames(showIdx + json_start_id);
-	SetCheckNames(showIdx + json_start_id);
-	showSamples(showIdx + json_start_id);
-	
-	GetDlgItem(IDC_STATIC6)->SetWindowText(state[showIdx] ? L"已标注" : L"未标注");
+	ShowNextImage();
 }
 
 // prev image
@@ -586,12 +619,16 @@ void CSceneAnnotationDlg::OnBnClickedButton2()
 	showIdx--;
 	DrawPic(showIdx);
 	groupRadio = 0;
-	SetRadioState(showIdx);
-	SetCheckBoxState(showIdx);
-	SetRadioNames(showIdx + json_start_id);
-	SetCheckNames(showIdx + json_start_id);
-	showSamples(showIdx + json_start_id);
-	GetDlgItem(IDC_STATIC6)->SetWindowText(state[showIdx] ? L"已标注" : L"未标注");
+	CString key = m_allImgName[showIdx];
+	SetRadioState(key);
+	SetCheckBoxState(key);
+	SetRadioNames(key);
+	SetCheckNames(key);
+	showSamples(key);
+	m_globalIdx.Format(L"%d", showIdx + 1);
+	UpdateData(false);
+	GetDlgItem(IDC_IMGNAME)->SetWindowText(key);
+	GetDlgItem(IDC_STATIC6)->SetWindowText(m_annotated.count(key) ? L"已标注" : L"未标注");
 }
 
 
@@ -615,46 +652,41 @@ void CSceneAnnotationDlg::OnBnClickedEnsure()
 	//if (num_commit == m_allImgVec.size())
 	//	return;
 
-	
-	num_commit = state[showIdx] ? num_commit : num_commit + 1; // 如果本来已经标注，则不变，否则加1
-	state[showIdx] = (char)1;
+	CString key = m_allImgName[showIdx];
+	num_commit = m_annotated.count(key) ? num_commit : num_commit + 1; // 如果本来已经标注，则不变，否则加1
 	m_pro.SetPos(num_commit);
 	CString info;
 	info.Format(L"(%d/%d)", num_commit, m_allImgVec.size());
 	GetDlgItem(IDC_STATIC4)->SetWindowText(info);
 
-	string img_name = ((LPCSTR)CStringA(getName(m_allImgVec[showIdx])));
+	string img_name = (LPCSTR)CStringA(key);
 	if (m_class_sel == 10)
-		sel_class = -1;
+		sel_class = NOSCENE;
+	else if (m_class_sel == 11)
+		sel_class = NOLABEL;
 	else
-		sel_class = (*p_scene)[showIdx + json_start_id][m_class_sel + groupRadio];
-	vector<int> attr;
+		sel_class = (*p_pr)[key].scene[m_class_sel + groupRadio];
+	vector<char16_t> attr;
 	for (int i = 0; i < 10; i++)
 		if (((CButton*)GetDlgItem(IDC_CHECK1 + i))->GetCheck() == BST_CHECKED)
-			attr.push_back((*p_attr)[showIdx + json_start_id][i]);
+			attr.push_back((*p_pr)[key].attr[i]);
 
-	// 写到文件中，同时更新m_annotated
+	// 写到文件中，同时更新m_annotated和m_NoneAnnotated
 	io->WriteKeyToJsonFile(save_annotated, img_name, sel_class, attr);
-	if (m_annotated.count(getName(m_allImgVec[showIdx])) == 0)
-		m_annotated.insert(pair<CString, Annotation>(getName(m_allImgVec[showIdx]), Annotation(sel_class, attr)));
+	if (m_annotated.count(key) == 0)
+	{
+		WARN(m_NoneAnnotated.count(key), "Problem: This image is not in both Annotated and NONE-Annotated vector!");
+		m_annotated.insert(pair<CString, Annotation>(key, Annotation(sel_class, attr)));
+		m_NoneAnnotated.erase(key);
+	}
 	else
 	{
-		m_annotated[getName(m_allImgVec[showIdx])].scene_id = sel_class;
-		m_annotated[getName(m_allImgVec[showIdx])].attr = attr;
+		WARN(!m_NoneAnnotated.count(key), "Problem: This image is in both Annotated and NONE-Annotated vector!");
+		m_annotated[key].scene_id = sel_class;
+		m_annotated[key].attr = attr;
 	}
 
-	WARN(showIdx + 1 < m_allImgVec.size(), "This is the final image!");
-	
-	showIdx++;
-	DrawPic(showIdx);
-	groupRadio = 0;
-	SetRadioState(showIdx);
-	SetCheckBoxState(showIdx);
-	SetRadioNames(showIdx + json_start_id);
-	SetCheckNames(showIdx + json_start_id);
-	showSamples(showIdx + json_start_id);
-
-	GetDlgItem(IDC_STATIC6)->SetWindowText(state[showIdx] ? L"已标注" : L"未标注");
+	ShowNextImage();
 
 	
 }
@@ -704,9 +736,10 @@ void CSceneAnnotationDlg::OnBnClickedChangeGroup()
 {
 	// TODO:  在此添加控件通知处理程序代码
 	groupRadio = 10 - groupRadio;
-	SetRadioState(showIdx);
-	SetRadioNames(showIdx + json_start_id);
-	showSamples(showIdx + json_start_id);
+	CString key = m_allImgName[showIdx];
+	SetRadioState(key);
+	SetRadioNames(key);
+	showSamples(key);
 }
 
 
@@ -733,7 +766,7 @@ void CSceneAnnotationDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	if (pic_id == -1)
 		return;
 	CString root = _T(SAMPLEROOT);
-	int pr_label = (*p_scene)[showIdx + json_start_id][pic_id / 2 + groupRadio];
+	int pr_label = (*p_pr)[m_allImgName[showIdx]].scene[pic_id / 2 + groupRadio];
 	char p[5];
 	sprintf(p, "%d", pr_label);
 	CString path = root + p + _T("\\*.*");
@@ -769,10 +802,10 @@ void CSceneAnnotationDlg::OnLButtonDown(UINT nFlags, CPoint point)
 
 
 
-void CSceneAnnotationDlg::SetRadioState(int showIdx)
+void CSceneAnnotationDlg::SetRadioState(CString key)
 {
 	// 获取当前图片名
-	CString key = getName(m_allImgVec[showIdx]);
+
 
 	if (m_annotated.size() == 0 || m_annotated.count(key) == 0) //无标注信息
 	{
@@ -782,24 +815,30 @@ void CSceneAnnotationDlg::SetRadioState(int showIdx)
 	{
 		Annotation anno = m_annotated[key];
 		// 读取所选的类别和属性在前20个属性中的id
-		int sel_id = -2;
-		if (anno.scene_id == -1) //无标签
-			sel_id = -1;
+		int sel_id = -3;
+		if (anno.scene_id == NOSCENE) //非场景
+			sel_id = NOSCENE;
+		else if (anno.scene_id == NOLABEL) //无合适
+			sel_id = NOLABEL;
 		else{
 			for (int i = 0; i < 20; i++)
 			{
-				if ((*p_scene)[showIdx + json_start_id][i] == anno.scene_id)
+				if ((*p_pr)[key].scene[i] == anno.scene_id)
 				{
 					sel_id = i;
 					break;
 				}
 			}
 		}
-		if (sel_id==-1)
+		if (sel_id==NOSCENE)
 		{
 			m_class_sel = 10;// NONE
 		}
-		else if (sel_id == -2) // json BUG *********************************
+		else if (sel_id == NOLABEL)
+		{
+			m_class_sel = 11;
+		}
+		else if (sel_id == -3) // json BUG *********************************
 		{
 			m_class_sel = 0;
 		}
@@ -822,9 +861,8 @@ void CSceneAnnotationDlg::SetRadioState(int showIdx)
 	UpdateData(false);
 }
 
-void CSceneAnnotationDlg::SetCheckBoxState(int showIdx)
+void CSceneAnnotationDlg::SetCheckBoxState(CString key)
 {
-	CString key = getName(m_allImgVec[showIdx]);
 	for (int i = 0; i < 10; i++)
 		((CButton*)GetDlgItem(IDC_CHECK1 + i))->SetCheck(BST_UNCHECKED);
 
@@ -836,7 +874,7 @@ void CSceneAnnotationDlg::SetCheckBoxState(int showIdx)
 		{
 			for (int j = 0; j < 10; j++)
 			{
-				if ((*p_attr)[showIdx + json_start_id][j] == anno.attr[i])
+				if ((*p_pr)[key].attr[j] == anno.attr[i])
 				{
 					((CButton*)GetDlgItem(IDC_CHECK1 + j))->SetCheck(BST_CHECKED);
 					break;
@@ -847,9 +885,220 @@ void CSceneAnnotationDlg::SetCheckBoxState(int showIdx)
 	UpdateData(false);
 }
 
+void CSceneAnnotationDlg::ShowNextImage()
+{
+	CString key;
+	if (m_NoneAnnotated.size() == 0) // 没有未标注的图像，正常往后访问
+	{
+		if (showIdx + 1 >= m_allImgVec.size())
+		{
+			GetDlgItem(IDC_STATIC6)->SetWindowText(m_annotated.count(m_allImgName[showIdx]) ? L"已标注" : L"未标注");
+			MessageBox(L"This is the final image!");
+			return;
+		}
+		
+		showIdx++;
+		DrawPic(showIdx);
+		groupRadio = 0;
+		key = m_allImgName[showIdx];
+		SetRadioState(key);
+		SetCheckBoxState(key);
+		SetRadioNames(key);
+		SetCheckNames(key);
+		showSamples(key);
+
+		m_globalIdx.Format(L"%d", showIdx + 1);
+		UpdateData(false);
+		GetDlgItem(IDC_IMGNAME)->SetWindowText(key);
+	}
+	else
+	{
+		//判断当前显示图像是否已标注
+		// 若当前已经被标注，则从未标注的头部取一张显示
+		if (m_annotated.count(m_allImgName[showIdx]))
+		{
+			key = *m_NoneAnnotated.begin();
+			vector<CString>::iterator iter = find(m_allImgName.begin(), m_allImgName.end(), key);
+			if (iter != m_allImgName.end())
+				showIdx = iter - m_allImgName.begin();
+			else{
+				MessageBox(L"ERROR!");
+				return;
+			}
+			DrawPic(showIdx);
+			SetRadioState(key);
+			SetCheckBoxState(key);
+			SetRadioNames(key);
+			SetCheckNames(key);
+			showSamples(key);
+			m_globalIdx.Format(L"%d", showIdx + 1);
+			UpdateData(false);
+			GetDlgItem(IDC_IMGNAME)->SetWindowText(key);
+		}
+		// 若当前未被标注，则先找到他在未标注集合里的位置，取他的下一张显示
+		else
+		{
+			key = m_allImgName[showIdx];
+			set<CString>::iterator next = m_NoneAnnotated.find(key);
+			next++;
+			if (next == m_NoneAnnotated.end())
+			{
+				MessageBox(L"This is the last none-annotated image!");
+				return;
+			}
+			else
+			{
+				vector<CString>::iterator v_iter = find(m_allImgName.begin(), m_allImgName.end(), *next);
+				if (v_iter != m_allImgName.end())
+					showIdx = v_iter - m_allImgName.begin();
+				else{
+					MessageBox(L"ERROR!");
+					return;
+				}
+				DrawPic(showIdx);
+				key = m_allImgName[showIdx];
+				SetRadioState(key);
+				SetCheckBoxState(key);
+				SetRadioNames(key);
+				SetCheckNames(key);
+				showSamples(key);
+				m_globalIdx.Format(L"%d", showIdx + 1);
+				UpdateData(false);
+				GetDlgItem(IDC_IMGNAME)->SetWindowText(key);
+			}
+		}
+	}
+
+
+	GetDlgItem(IDC_STATIC6)->SetWindowText(m_annotated.count(key) ? L"已标注" : L"未标注");
+}
+
 static CString getName(CString path)
 {
 	CString name = path;
 	name.Delete(0, name.ReverseFind('\\') + 1);
 	return name;
+}
+
+void CSceneAnnotationDlg::OnBnClickedOk()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	// 将缓存中的内容全部写到文件上
+
+	if (!io->isFile(save_annotated)) // 如果不存在文件（被误删）
+	{
+		if (m_annotated.size() != 0)
+		{
+			ofstream ofs;
+			ofs.open(save_annotated);
+			Json::Value root;
+			Json::StyledWriter writer;
+			for (map<CString, Annotation>::iterator iter = m_annotated.begin(); iter != m_annotated.end(); iter++)
+			{
+				Json::Value info;
+				info["scene_class"] = Json::Value((*iter).second.scene_id);
+				if ((*iter).second.attr.size() == 0)
+					info["scene_attribute"].resize(0);
+				else
+				{
+					vector<char16_t> tmp = (*iter).second.attr;
+					sort(tmp.begin(), tmp.end());
+					for (size_t i = 0; i < tmp.size(); i++)
+						info["scene_attribute"].append(tmp[i]);
+				}
+				root[(LPCSTR)CStringA((*iter).first)] = info;
+			}
+			ofs << writer.write(root);
+			ofs.close();
+		}
+	}
+	else // 否则，先读取原有标注信息，判断是否有原来不存在的条目，如果有，重写，否则不做任何动作
+	{
+		Json::Value root;
+		io->ParseJson(save_annotated, root);
+		bool change = false;
+		for (map<CString, Annotation>::iterator iter = m_annotated.begin(); iter != m_annotated.end(); iter++)
+		{
+			if (root[(LPCSTR)CStringA((*iter).first)].isNull())
+			{
+				Json::Value info;
+				info["scene_class"] = Json::Value((*iter).second.scene_id);
+				if ((*iter).second.attr.size() == 0)
+					info["scene_attribute"].resize(0);
+				else
+				{
+					vector<char16_t> tmp = (*iter).second.attr;
+					sort(tmp.begin(), tmp.end());
+					for (size_t i = 0; i < tmp.size(); i++)
+						info["scene_attribute"].append(tmp[i]);
+				}
+				root[(LPCSTR)CStringA((*iter).first)] = info;
+				change = true;
+			}
+		}
+		if (change)
+		{
+			ofstream ofs;
+			Json::StyledWriter writer;
+			ofs.open(save_annotated);
+			ofs << writer.write(root);
+			ofs.close();
+		}
+	}
+	CDialogEx::OnOK();
+}
+
+
+void CSceneAnnotationDlg::OnBnClickedCancel()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	if (MessageBox(L"Are you sure to exit without saving?", L"WARN", MB_YESNO) == IDNO)
+		return;
+	CDialogEx::OnCancel();
+}
+
+
+void CSceneAnnotationDlg::OnBnClickedRadio13()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	UpdateData(true);
+	if (!p_pr)
+		return;
+	SetRadioNames(m_allImgName[showIdx]);
+	SetCheckNames(m_allImgName[showIdx]);
+}
+
+
+void CSceneAnnotationDlg::OnBnClickedGo()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	if (m_allImgVec.size() == 0)
+		return;
+	UpdateData(true);
+	
+	// check
+	for (int i = 0; i < m_globalIdx.GetLength(); i++)
+	{
+		if (i == 0)
+		{
+			WARN(m_globalIdx[i]>'0'&&m_globalIdx[i] <= '9', "Invalid Number!");
+		}
+		else
+		{
+			WARN(m_globalIdx[i]>='0'&&m_globalIdx[i] <= '9', "Invalid Number!");
+		}		
+	}
+	int idx=atoi((LPCSTR)CStringA(m_globalIdx))-1;
+	WARN(idx >= 0 && idx < m_allImgVec.size(), "Invalid Number!");
+
+	showIdx = idx;
+	DrawPic(showIdx);
+	CString key = m_allImgName[showIdx];
+	SetRadioState(key);
+	SetCheckBoxState(key);
+	SetRadioNames(key);
+	SetCheckNames(key);
+	showSamples(key);
+	GetDlgItem(IDC_IMGNAME)->SetWindowText(key);
+	GetDlgItem(IDC_STATIC6)->SetWindowText(m_annotated.count(key) ? L"已标注" : L"未标注");
 }

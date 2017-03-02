@@ -1,0 +1,34 @@
+{
+   "COCO_train2014_000000000307.jpg" : {
+      "scene_attribute" : [ 41, 42 ],
+      "scene_class" : 74
+   },
+   "COCO_train2014_000000000309.jpg" : {
+      "scene_attribute" : [ 41, 74, 93 ],
+      "scene_class" : 117
+   },
+   "COCO_train2014_000000000370.jpg" : {
+      "scene_attribute" : [],
+      "scene_class" : 108
+   },
+   "COCO_train2014_000000000450.jpg" : {
+      "scene_attribute" : [],
+      "scene_class" : 37
+   },
+   "COCO_train2014_000000000508.jpg" : {
+      "scene_attribute" : [ 70, 74 ],
+      "scene_class" : 193
+   },
+   "COCO_train2014_000000000531.jpg" : {
+      "scene_attribute" : [],
+      "scene_class" : 190
+   },
+   "COCO_train2014_000000000572.jpg" : {
+      "scene_attribute" : [ 91 ],
+      "scene_class" : 109
+   },
+   "COCO_train2014_000000000735.jpg" : {
+      "scene_attribute" : [],
+      "scene_class" : 152
+   }
+}
